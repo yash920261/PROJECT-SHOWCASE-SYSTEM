@@ -1,0 +1,10 @@
+export { Home } from './Home';
+export { Projects } from './Projects';
+export { ProjectDetail } from './ProjectDetail';
+export { SubmitProject } from './SubmitProject';
+export { Forum } from './Forum';
+export { Faculty } from './Faculty';
+export { Voting } from './Voting';
+export { Group } from './Group';
+export { Analytics } from './Analytics';
+export { Auth } from './Auth';

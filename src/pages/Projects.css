@@ -1,5 +1,6 @@
+/* Projects Page — Ion Flux Dark Mode */
 .projects-page {
-  padding-top: 6rem;
+  padding-top: 7rem;
   padding-bottom: 4rem;
 }
 
@@ -8,40 +9,30 @@
   justify-content: space-between;
   align-items: center;
   margin-bottom: 2rem;
-  flex-wrap: wrap;
-  gap: 1rem;
 }
 
 .page-title {
-  font-size: 2.5rem;
+  font-size: 2.25rem;
   color: var(--text-main);
-  margin-bottom: 0.5rem;
 }
 
 .page-subtitle {
   color: var(--text-muted);
-  font-size: 1.1rem;
+  margin-top: 0.25rem;
 }
 
 .projects-controls {
+  padding: 1.25rem 1.5rem;
+  margin-bottom: 2rem;
   display: flex;
   flex-direction: column;
-  gap: 1.5rem;
-  padding: 1.5rem;
-  margin-bottom: 3rem;
+  gap: 1rem;
   background: var(--bg-surface);
-}
-
-@media (min-width: 768px) {
-  .projects-controls {
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-  }
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
 }
 
 .search-bar {
-  flex: 1;
   position: relative;
   display: flex;
   align-items: center;
@@ -49,34 +40,24 @@
 
 .search-icon {
   position: absolute;
-  left: 1rem;
-  color: var(--text-muted);
+  left: 0.875rem;
+  color: var(--text-dim);
+  pointer-events: none;
 }
 
 .search-bar input {
-  width: 100%;
-  padding: 0.875rem 1rem 0.875rem 3rem;
-  border-radius: var(--radius-full);
-  border: 1px solid var(--border-subtle);
-  background: var(--bg-page);
-  font-size: 1rem;
+  padding-left: 2.75rem;
+  background: var(--bg-surface-lowest);
 }
 
 .filter-group {
   display: flex;
   align-items: center;
-  gap: 1rem;
+  gap: 0.75rem;
 }
 
 .filter-icon {
-  color: var(--text-muted);
-  display: none;
-}
-
-@media (min-width: 768px) {
-  .filter-icon {
-    display: block;
-  }
+  color: var(--text-dim);
 }
 
 .department-filters {
@@ -86,41 +67,98 @@
 }
 
 .filter-btn {
-  padding: 0.5rem 1rem;
+  padding: 0.4rem 1rem;
   border-radius: var(--radius-full);
   border: 1px solid var(--border-subtle);
   background: transparent;
   color: var(--text-muted);
-  font-size: 0.85rem;
-  font-weight: 500;
+  font-size: 0.8rem;
+  font-weight: 600;
   cursor: pointer;
   transition: all var(--transition-fast);
+  letter-spacing: 0.03em;
 }
 
 .filter-btn:hover {
-  background: var(--bg-page);
-  color: var(--text-main);
+  border-color: var(--primary-container);
+  color: var(--primary);
 }
 
 .filter-btn.active {
-  background: var(--primary);
-  color: var(--white);
-  border-color: var(--primary);
+  background: linear-gradient(135deg, var(--primary) 0%, var(--primary-container) 100%);
+  color: var(--bg-page);
+  border-color: transparent;
+  box-shadow: var(--shadow-glow);
 }
 
-/* Reusable Grid Styles */
 .projects-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.5rem;
+}
+
+.project-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  transition: all var(--transition-smooth);
+  height: 100%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+}
+
+.project-card:hover {
+  transform: translateY(-4px) scale(1.02);
+  box-shadow: var(--shadow-glow-lg);
+  background: var(--bg-surface-high);
+}
+
+.card-header {
+  padding: 1.25rem 1.5rem;
+  padding-bottom: 0;
+}
+
+.card-body {
+  padding: 1rem 1.5rem;
+  flex-grow: 1;
+}
+
+.card-body h3 {
+  font-size: 1.15rem;
+  margin-bottom: 0.25rem;
+  color: var(--text-main);
+}
+
+.card-body .group {
+  font-size: 0.85rem;
+  color: var(--primary);
+  font-weight: 500;
+  margin-bottom: 1rem;
+}
+
+.tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.card-footer {
+  padding: 1rem 1.5rem;
+  margin-top: auto;
 }
 
 .no-results {
   grid-column: 1 / -1;
   text-align: center;
-  padding: 4rem 2rem;
-  color: var(--text-muted);
-  background: rgba(255, 255, 255, 0.5);
-  border-radius: var(--radius-lg);
-  font-size: 1.1rem;
+  padding: 3rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 768px) {
+  .projects-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
 }

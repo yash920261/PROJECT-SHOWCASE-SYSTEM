@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { MessageSquare, Search, Filter, Plus, Heart, MessageCircle, Loader, ArrowLeft, Send } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './Forum.css';
@@ -25,13 +25,26 @@ export const Forum = () => {
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState('');
   const [loadingComments, setLoadingComments] = useState(false);
-  const [userLiked, setUserLiked] = useState(false); // Check if current user liked selected thread
+  const [userLiked, setUserLiked] = useState(false);
+
+  // Like debounce guard
+  const isLikingRef = useRef(false);
 
   useEffect(() => {
     supabase.auth.getUser().then(({data}) => {
       if(data?.user) setUser(data.user);
     });
+
+    // Listen for auth changes so user state updates on login/logout
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (_event, session) => {
+        setUser(session?.user || null);
+      }
+    );
+
     fetchThreads();
+
+    return () => subscription.unsubscribe();
   }, []);
 
   const fetchThreads = async () => {
@@ -93,6 +106,7 @@ export const Forum = () => {
     setSelectedThread(null);
     setComments([]);
     setNewComment('');
+    setUserLiked(false);
   };
 
   const fetchComments = async (threadId) => {
@@ -107,7 +121,7 @@ export const Forum = () => {
       if (error) throw error;
       setComments(data || []);
     } catch (err) {
-      console.error('Error fetching comments', err);
+      console.error('Error fetching comments', err.message);
     } finally {
       setLoadingComments(false);
     }
@@ -116,66 +130,101 @@ export const Forum = () => {
   const checkUserLiked = async (threadId) => {
     if (!user) return;
     try {
-      const { data, error } = await supabase
+      const { data } = await supabase
         .from('discussion_likes')
         .select('id')
         .eq('discussion_id', threadId)
         .eq('user_id', user.id)
-        .single();
+        .maybeSingle();
         
-      if (data) setUserLiked(true);
-      else setUserLiked(false);
+      setUserLiked(!!data);
     } catch {
       setUserLiked(false);
     }
   };
 
   const handleLike = async (e, threadToLike) => {
-    e.stopPropagation(); // Prevent opening thread if clicking like on the list
+    e.stopPropagation();
     if (!user) return alert('Please login to like discussions.');
     
+    // Prevent rapid double-clicks
+    if (isLikingRef.current) return;
+    isLikingRef.current = true;
+
     try {
-      // Optimistic upate if we are in list view
-      const isLikingSelected = selectedThread && selectedThread.id === threadToLike.id;
-      
-      // If user hasn't liked it (or we assume toggle setup)
-      // Check db if already liked to toggle properly
-      const { data: existingLike } = await supabase
+      const threadId = threadToLike.id;
+      const isLikingSelected = selectedThread && selectedThread.id === threadId;
+
+      // Check if user already liked
+      const { data: existingLike, error: checkError } = await supabase
         .from('discussion_likes')
         .select('id')
-        .eq('discussion_id', threadToLike.id)
+        .eq('discussion_id', threadId)
         .eq('user_id', user.id)
         .maybeSingle();
 
+      if (checkError) {
+        console.error('Like check error:', checkError.message);
+        throw checkError;
+      }
+
+      // Get fresh like count from DB to avoid stale state
+      const { data: freshThread } = await supabase
+        .from('discussions')
+        .select('likes')
+        .eq('id', threadId)
+        .single();
+      
+      const currentLikes = freshThread?.likes || 0;
+
       if (existingLike) {
-        // UNLIKE logic
-        await supabase.from('discussion_likes').delete().eq('id', existingLike.id);
-        const newLikesCount = Math.max(0, (threadToLike.likes || 0) - 1);
-        await supabase.from('discussions').update({ likes: newLikesCount }).eq('id', threadToLike.id);
+        // === UNLIKE ===
+        const { error: deleteError } = await supabase
+          .from('discussion_likes')
+          .delete()
+          .eq('id', existingLike.id);
+        
+        if (deleteError) {
+          console.error('Unlike delete error:', deleteError.message);
+          throw deleteError;
+        }
+
+        const newCount = Math.max(0, currentLikes - 1);
+        await supabase.from('discussions').update({ likes: newCount }).eq('id', threadId);
         
         if (isLikingSelected) {
           setUserLiked(false);
-          setSelectedThread({ ...selectedThread, likes: newLikesCount });
+          setSelectedThread(prev => ({ ...prev, likes: newCount }));
         }
-        setThreads(threads.map(t => t.id === threadToLike.id ? { ...t, likes: newLikesCount } : t));
+        setThreads(prev => prev.map(t => t.id === threadId ? { ...t, likes: newCount } : t));
       } else {
-        // LIKE logic
-        await supabase.from('discussion_likes').insert({
-          discussion_id: threadToLike.id,
-          user_id: user.id
-        });
-        const newLikesCount = (threadToLike.likes || 0) + 1;
-        await supabase.from('discussions').update({ likes: newLikesCount }).eq('id', threadToLike.id);
+        // === LIKE ===
+        const { error: insertError } = await supabase
+          .from('discussion_likes')
+          .insert({
+            discussion_id: threadId,
+            user_id: user.id
+          });
+        
+        if (insertError) {
+          console.error('Like insert error:', insertError.message);
+          throw insertError;
+        }
+
+        const newCount = currentLikes + 1;
+        await supabase.from('discussions').update({ likes: newCount }).eq('id', threadId);
         
         if (isLikingSelected) {
           setUserLiked(true);
-          setSelectedThread({ ...selectedThread, likes: newLikesCount });
+          setSelectedThread(prev => ({ ...prev, likes: newCount }));
         }
-        setThreads(threads.map(t => t.id === threadToLike.id ? { ...t, likes: newLikesCount } : t));
+        setThreads(prev => prev.map(t => t.id === threadId ? { ...t, likes: newCount } : t));
       }
     } catch (err) {
-      console.error(err);
-      alert('Error processing like.');
+      console.error('Like error:', err);
+      alert('Error processing like: ' + (err.message || 'Unknown error'));
+    } finally {
+      isLikingRef.current = false;
     }
   };
 
@@ -185,21 +234,32 @@ export const Forum = () => {
 
     try {
       setIsSubmitting(true);
-      const { error } = await supabase
-        .from('discussion_comments')
-        .insert({
-          discussion_id: selectedThread.id,
-          author_id: user.id,
-          author_name: user.user_metadata?.name || user.email.split('@')[0],
-          content: newComment.trim()
-        });
-
-      if (error) throw error;
       
+      const commentData = {
+        discussion_id: selectedThread.id,
+        author_id: user.id,
+        author_name: user.user_metadata?.name || user.email.split('@')[0],
+        content: newComment.trim()
+      };
+
+      console.log('Posting comment:', commentData);
+
+      const { data, error } = await supabase
+        .from('discussion_comments')
+        .insert(commentData)
+        .select();
+
+      if (error) {
+        console.error('Comment insert error:', error);
+        throw error;
+      }
+      
+      console.log('Comment posted successfully:', data);
       setNewComment('');
       fetchComments(selectedThread.id);
     } catch (err) {
-      alert(err.message);
+      console.error('Comment post failed:', err);
+      alert('Failed to post reply: ' + (err.message || 'Unknown error. Check console for details.'));
     } finally {
       setIsSubmitting(false);
     }
@@ -294,7 +354,7 @@ export const Forum = () => {
                   ))}
                 </div>
 
-                <div className="thread-stats mt-4 border-t pt-4 border-white/10 flex items-center justify-between">
+                <div className="thread-stats-bar">
                    <button 
                      className={`like-action-btn ${userLiked ? 'liked' : ''}`}
                      onClick={(e) => handleLike(e, selectedThread)}
@@ -340,7 +400,7 @@ export const Forum = () => {
                       value={newComment}
                       onChange={(e) => setNewComment(e.target.value)}
                     />
-                    <div className="flex justify-end mt-2">
+                    <div className="comment-form-actions">
                       <button 
                         className="btn-primary" 
                         onClick={handlePostComment}

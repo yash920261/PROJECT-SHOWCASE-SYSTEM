@@ -1,31 +1,38 @@
+/* Footer — Ion Flux Dark Mode */
 .footer {
-  margin-top: auto;
   border-top: 1px solid var(--border-subtle);
+  padding: 2rem 0;
+  margin-top: 4rem;
   background: var(--bg-surface);
-  color: var(--text-muted);
-  padding: 3rem 0;
-  font-size: 0.9rem;
 }
 
 .footer-content {
   display: flex;
-  flex-direction: column;
   justify-content: space-between;
-  gap: 1.5rem;
+  align-items: center;
 }
 
 .footer-brand h3 {
+  font-family: 'Space Grotesk', sans-serif;
+  font-size: 1.1rem;
   color: var(--text-main);
   margin-bottom: 0.25rem;
 }
 
-.footer-links {
-  text-align: center;
+.footer-brand p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
 }
 
-@media (min-width: 768px) {
+.footer-links p {
+  font-size: 0.85rem;
+  color: var(--text-dim);
+}
+
+@media (max-width: 600px) {
   .footer-content {
-    flex-direction: row;
-    align-items: center;
+    flex-direction: column;
+    text-align: center;
+    gap: 1rem;
   }
 }

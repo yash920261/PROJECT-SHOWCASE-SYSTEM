@@ -51,3 +51,11 @@ coverage.json
 
 # OS specific
 Thumbs.db
+
+# Stitch MCP (auto-generated design metadata)
+.stitch/
+
+# Test/Scratch scripts
+test-supabase.js
+supabase/
+supabase/migrations

@@ -45,7 +45,7 @@ const Navbar = () => {
     { name: 'Forum', path: '/forum', icon: MessageSquare },
     { name: 'Faculty', path: '/faculty', icon: Briefcase },
     ...(role === 'faculty' ? [{ name: 'Voting', path: '/voting', icon: ShieldCheck }] : []),
-    { name: 'Analytics', path: '/analytics', icon: Activity },
+    ...(role === 'faculty' || role === 'admin' ? [{ name: 'Analytics', path: '/analytics', icon: Activity }] : []),
   ];
 
   return (
@@ -68,6 +68,7 @@ const Navbar = () => {
                 key={link.path} 
                 to={link.path} 
                 className={`nav-link ${isActive ? 'active' : ''}`}
+                data-tooltip={link.name}
               >
                 <Icon size={18} className="nav-icon" />
                 <span>{link.name}</span>

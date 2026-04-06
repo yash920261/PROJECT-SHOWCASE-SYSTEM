@@ -178,17 +178,61 @@
   }
 }
 
+/* Medium screens: show icons only, hide text labels */
 @media (max-width: 992px) {
-  .nav-menu {
+  .nav-link span {
     display: none;
+  }
+
+  .nav-link {
+    padding: 0.55rem;
+    position: relative;
+  }
+
+  .nav-link .nav-icon {
+    opacity: 0.75;
+  }
+
+  .nav-menu {
+    gap: 0.15rem;
+  }
+
+  /* Tooltip on hover */
+  .nav-link::before {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: -2.2rem;
+    left: 50%;
+    transform: translateX(-50%) scale(0.9);
+    background: var(--bg-surface-high, #29283a);
+    color: var(--text-main);
+    font-size: 0.7rem;
+    font-weight: 600;
+    padding: 0.3rem 0.55rem;
+    border-radius: var(--radius-sm, 4px);
+    white-space: nowrap;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.15s ease, transform 0.15s ease;
+    border: 1px solid var(--border-subtle);
+    z-index: 10;
+  }
+
+  .nav-link:hover::before {
+    opacity: 1;
+    transform: translateX(-50%) scale(1);
   }
 }
 
+/* Small screens */
 @media (max-width: 600px) {
   .signout-text {
     display: none;
   }
   .signout-btn {
     padding: 0.6rem;
+  }
+  .brand-name {
+    display: none;
   }
 }

@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Activity, Users, FileText, CheckCircle, Clock, XCircle, TrendingUp, ArrowUp, ArrowDown, RefreshCw } from 'lucide-react';
+import { Activity, Users, FileText, CheckCircle, Clock, XCircle, TrendingUp, ArrowUp, ArrowDown, RefreshCw, ShieldOff } from 'lucide-react';
 import { AreaChart, Area, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, Legend } from 'recharts';
 import { supabase } from '../lib/supabase';
+import { useNavigate } from 'react-router-dom';
 import './Analytics.css';
 
 const DEPT_COLORS = {
@@ -72,6 +73,26 @@ export const Analytics = () => {
   const [timeRange, setTimeRange] = useState('6m'); // '3m', '6m', '1y'
   const [activeDept, setActiveDept] = useState(null); // pie click filter
   const [lastRefresh, setLastRefresh] = useState(new Date());
+  const [authorized, setAuthorized] = useState(null); // null = checking, true/false
+  const navigate = useNavigate();
+
+  // Role check on mount
+  useEffect(() => {
+    const checkAccess = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        setAuthorized(false);
+        return;
+      }
+      const role = user.user_metadata?.role;
+      if (role === 'faculty' || role === 'admin') {
+        setAuthorized(true);
+      } else {
+        setAuthorized(false);
+      }
+    };
+    checkAccess();
+  }, []);
 
   const fetchAnalytics = useCallback(async () => {
     try {
@@ -145,8 +166,10 @@ export const Analytics = () => {
   }, [timeRange]);
 
   useEffect(() => {
-    fetchAnalytics();
-  }, [fetchAnalytics]);
+    if (authorized) {
+      fetchAnalytics();
+    }
+  }, [fetchAnalytics, authorized]);
 
   const handlePieClick = (data) => {
     setActiveDept(activeDept === data.name ? null : data.name);
@@ -156,7 +179,26 @@ export const Analytics = () => {
     ? recentActivity.filter(a => a.dept === activeDept)
     : recentActivity;
 
-  if (loading) {
+  // Access denied screen
+  if (authorized === false) {
+    return (
+      <div className="analytics-page container animate-fade-in">
+        <div className="access-denied-container">
+          <div className="access-denied-card glass-panel">
+            <ShieldOff size={56} className="access-denied-icon" />
+            <h2>Access Denied</h2>
+            <p>The Analytics dashboard is restricted to <strong>Faculty</strong> and <strong>Admin</strong> users only.</p>
+            <button className="btn-primary" onClick={() => navigate('/')}>
+              Go to Home
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Still checking auth
+  if (authorized === null || loading) {
     return (
       <div className="analytics-page container animate-fade-in flex justify-center items-center min-h-[70vh]">
         <RefreshCw size={48} className="animate-spin text-primary" />

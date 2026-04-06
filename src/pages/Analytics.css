@@ -4,6 +4,44 @@
   padding-bottom: 4rem;
 }
 
+/* Access Denied */
+.access-denied-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 55vh;
+}
+
+.access-denied-card {
+  text-align: center;
+  padding: 3rem 2.5rem;
+  max-width: 440px;
+  width: 100%;
+}
+
+.access-denied-icon {
+  color: var(--danger);
+  margin: 0 auto 1.25rem;
+  opacity: 0.85;
+}
+
+.access-denied-card h2 {
+  font-size: 1.75rem;
+  color: var(--text-main);
+  margin-bottom: 0.75rem;
+}
+
+.access-denied-card p {
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
+}
+
+.access-denied-card p strong {
+  color: var(--primary);
+}
+
 .analytics-header {
   display: flex;
   justify-content: space-between;

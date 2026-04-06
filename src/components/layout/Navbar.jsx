@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState, useEffect } from 'react';
 import { Home, Grid, Users, MessageSquare, Briefcase, Activity, ShieldCheck, LogIn, LogOut, User } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
@@ -6,6 +6,7 @@ import './Navbar.css';
 
 const Navbar = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [user, setUser] = useState(null);
   const [role, setRole] = useState(null);
 
@@ -36,6 +37,7 @@ const Navbar = () => {
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
+    navigate('/auth');
   };
 
   const navLinks = [

@@ -1,13 +1,37 @@
+import os
+from dotenv import load_dotenv
 from fastapi import FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import List, Optional
 
+load_dotenv()
+
 app = FastAPI(title="Project Showcase System Backend API", description="API handling project review and backend logic")
+
+# CORS — allow frontend origins (local dev + Render production)
+allowed_origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
+
+# Add your Render frontend URL from the environment (set in Render dashboard)
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=allowed_origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # Placeholder for Supabase client
 # from supabase import create_client, Client
-# url: str = "your-supabase-url"
-# key: str = "your-supabase-key"
+# url: str = os.getenv("SUPABASE_URL")
+# key: str = os.getenv("SUPABASE_ANON_KEY")
 # supabase: Client = create_client(url, key)
 
 class ProjectApproval(BaseModel):

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ShieldCheck, ThumbsUp, ThumbsDown, CheckCircle, ExternalLink, Activity, Loader, Lock } from 'lucide-react';
+import { ClipboardCheck, ThumbsUp, ThumbsDown, CheckCircle, ExternalLink, Loader, Lock } from 'lucide-react';
 import { supabase } from '../lib/supabase';
 import './Voting.css';
 
@@ -103,12 +103,12 @@ export const Voting = () => {
       
       <div className="page-header flex-header">
         <div>
-          <h1>Faculty Voting Terminal</h1>
-          <p>Review pending student projects and record your vote on the blockchain.</p>
+          <h1>Faculty Review Panel</h1>
+          <p>Review pending student projects and accept or reject submissions.</p>
         </div>
-        <div className="blockchain-status">
-          <Activity size={18} className="text-success animate-pulse" />
-          <span>Connected to Network</span>
+        <div className="review-status">
+          <ClipboardCheck size={18} className="text-success" />
+          <span>Review Portal Active</span>
         </div>
       </div>
 
@@ -145,7 +145,7 @@ export const Voting = () => {
                     </div>
                   </div>
                   
-                  <div className="card-footer blockchain-actions">
+                  <div className="card-footer review-actions">
                     <Link to={`/project/${project.id}`} className="btn-outline">
                       <ExternalLink size={16} /> full details
                     </Link>
@@ -155,26 +155,26 @@ export const Voting = () => {
                         className="btn-success icon-btn" 
                         onClick={() => handleVote(project.id, 'approve')}
                         disabled={isProcessing === project.id}
-                        title="Approve Transaction"
+                        title="Accept Project"
                       >
-                        {isProcessing === project.id ? <Activity className="animate-spin" /> : <ThumbsUp size={18} />}
+                        {isProcessing === project.id ? <Loader className="animate-spin" size={18} /> : <ThumbsUp size={18} />}
                       </button>
                       
                       <button 
                         className="btn-danger icon-btn" 
                         onClick={() => handleVote(project.id, 'reject')}
                         disabled={isProcessing === project.id}
-                        title="Reject Transaction"
+                        title="Reject Project"
                       >
-                        {isProcessing === project.id ? <Activity className="animate-spin" /> : <ThumbsDown size={18} />}
+                        {isProcessing === project.id ? <Loader className="animate-spin" size={18} /> : <ThumbsDown size={18} />}
                       </button>
                     </div>
                   </div>
                   
                   {isProcessing === project.id && (
                     <div className="processing-overlay">
-                      <ShieldCheck size={32} className="text-primary animate-pulse mb-2" />
-                      <p>Signing transaction...</p>
+                      <ClipboardCheck size={32} className="text-primary animate-pulse mb-2" />
+                      <p>Processing review...</p>
                     </div>
                   )}
 
@@ -185,7 +185,7 @@ export const Voting = () => {
         )}
 
         <div className="voting-history glass-panel">
-          <h3>Your Recent Votes</h3>
+          <h3>Recent Review Decisions</h3>
           <ul className="history-list">
             {history.map(project => (
               <li key={`history-${project.id}`} className="history-item">
@@ -193,14 +193,14 @@ export const Voting = () => {
                   <span className={`status-dot ${project.status}`}></span>
                   <div className="history-text">
                     <strong>{project.title}</strong>
-                    <span>Txn: 0x{Math.random().toString(16).substring(2, 10)}...</span>
+                    <span>Reviewed on {new Date(project.created_at).toLocaleDateString()}</span>
                   </div>
                 </div>
                 <span className={`history-label ${project.status}`}>{project.status.toUpperCase()}</span>
               </li>
             ))}
             {history.length === 0 && (
-              <li className="history-item text-muted">No recent votes recorded on this chain.</li>
+              <li className="history-item text-muted">No recent review decisions yet.</li>
             )}
           </ul>
         </div>

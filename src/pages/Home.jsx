@@ -42,7 +42,7 @@ export const Home = () => {
               Showcase Your <span className="text-gradient">Academic Excellence</span>
             </h1>
             <p className="hero-subtitle">
-              A secure, blockchain-verified platform for students to submit, discuss, 
+              A secure, faculty-verified platform for students to submit, discuss, 
               and showcase their final year projects to faculty and peers.
             </p>
             <div className="hero-actions">
@@ -74,7 +74,7 @@ export const Home = () => {
           <div className="feature-card glass-panel">
             <div className="feature-icon"><ShieldCheck size={24} /></div>
             <h3>Faculty Verified</h3>
-            <p>Every project undergoes a rigorous review process and is approved via a secure blockchain voting system.</p>
+            <p>Every project undergoes a rigorous review process and is approved by authorized faculty members.</p>
           </div>
           <div className="feature-card glass-panel">
             <div className="feature-icon"><Users size={24} /></div>

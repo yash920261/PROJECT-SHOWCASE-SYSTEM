@@ -1,4 +1,4 @@
-/* Voting Page — Ion Flux Dark Mode */
+/* Faculty Review Page — Ion Flux Dark Mode */
 .voting-page {
   padding-top: 7rem;
   padding-bottom: 4rem;
@@ -24,7 +24,7 @@
   margin-top: 0.25rem;
 }
 
-.blockchain-status {
+.review-status {
   display: flex;
   align-items: center;
   gap: 0.5rem;
@@ -125,7 +125,7 @@
   gap: 0.4rem;
 }
 
-.blockchain-actions {
+.review-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
